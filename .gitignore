@@ -1,4 +1,4 @@
-*.cvs
+*.csv
 
 # History files
 .Rhistory
