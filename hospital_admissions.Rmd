@@ -20,11 +20,52 @@ library(readr)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
+library(stringr)
 ```
 ```{r, Import Data}
+# Url for data dowload. I svaed the cvs file locally to avoid dowloading each time
+# I reload the script.
 url <- "https://health.data.ny.gov/api/views/gnzp-ekau/rows.csv?accessType=DOWNLOAD"
-discharges <- read_csv(url)
+download.file(url, "hosp_discharges.csv")
+
+discharges <- read_csv("hosp_discharges.csv")
 ```
 
+Let's explore the data.
+
+```{r}
+glimpse(discharges)
+```
+
+
+The dataset has `length(discharges)` records and `length(names(discharges))` columns.
+The column names have spaces in them which makes working with them a bit cumbersome as quotes have to be used around column names everytime. We can rename the columns by replacing spaces with "_".
+
+```{r}
+names(discharges)
+```
+
+```{r}
+col_names <- str_replace_all(names(discharges), pattern = " ", replacement = "_")
+names(discharges) <- col_names
+
+# Drop Zip code column as currently unuseful.
+discharges <- select(discharges, -c(7))
+```
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+unique(discharges$`Hospital County`)
+```
 
 
