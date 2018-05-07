@@ -3,16 +3,17 @@ title: "Hospital Admissions"
 author: "Onesmas Ngugi"
 date: "April 4, 2018"
 output: html_document
-        pdf
 ---
 # INTRODUCTION
 
 The Statewide Planning and Research Cooperative System (SPARCS) Inpatient De-identified File contains discharge level detail on patient characteristics, diagnoses, treatments, services, and charges. This data file contains basic record level detail for the discharge. The de-identified data file does not contain data that is protected health information (PHI) under HIPAA. The health information is not individually identifiable; all data elements considered identifiable have been redacted. For example, the direct identifiers regarding a date have the day and month portion of the date removed.
 
+
+
 # Libraries and Data
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo=FALSE, cache=TRUE)
 ```
 
 ```{r message=FALSE}
@@ -22,28 +23,67 @@ library(tidyr)
 library(ggplot2)
 library(stringr)
 ```
-```{r, Import Data}
-# Url for data dowload. I svaed the cvs file locally to avoid dowloading each time
+```{r, eval = FALSE}
+# Url for data dowload. I saved the cvs file locally to avoid dowloading each time
 # I reload the script.
 url <- "https://health.data.ny.gov/api/views/gnzp-ekau/rows.csv?accessType=DOWNLOAD"
 download.file(url, "hosp_discharges.csv")
-
-discharges <- read_csv("hosp_discharges.csv")
+```
+```{r}
+discharges <- read_csv("hosp_discharges.csv", col_types = cols(
+  `Health Service Area` = col_character(),
+  `Hospital County` = col_character(),
+  `Operating Certificate Number` = col_character(),
+  `Facility Id` = col_integer(),
+  `Facility Name` = col_character(),
+  `Age Group` = col_character(),
+  `Zip Code - 3 digits` = col_character(),
+  Gender = col_character(),
+  Race = col_character(),
+  Ethnicity = col_character(),
+  `Length of Stay` = col_double(),
+  `Type of Admission` = col_character(),
+  `Patient Disposition` = col_character(),
+  `Discharge Year` = col_integer(),
+  `CCS Diagnosis Code` = col_integer(),
+  `CCS Diagnosis Description` = col_character(),
+  `CCS Procedure Code` = col_integer(),
+  `CCS Procedure Description` = col_character(),
+  `APR DRG Code` = col_integer(),
+  `APR DRG Description` = col_character(),
+  `APR MDC Code` = col_integer(),
+  `APR MDC Description` = col_character(),
+  `APR Severity of Illness Code` = col_integer(),
+  `APR Severity of Illness Description` = col_character(),
+  `APR Risk of Mortality` = col_character(),
+  `APR Medical Surgical Description` = col_character(),
+  `Payment Typology 1` = col_character(),
+  `Payment Typology 2` = col_character(),
+  `Payment Typology 3` = col_character(),
+  `Attending Provider License Number` = col_integer(),
+  `Operating Provider License Number` = col_integer(),
+  `Other Provider License Number` = col_integer(),
+  `Birth Weight` = col_integer(),
+  `Abortion Edit Indicator` = col_character(),
+  `Emergency Department Indicator` = col_character(),
+  `Total Charges` = col_double(),
+  `Total Costs` = col_double()))
 ```
 
 Let's explore the data.
 
 ```{r}
-glimpse(discharges)
+names(discharges)
 ```
 
 
-The dataset has `length(discharges)` records and `length(names(discharges))` columns.
+The dataset has `r count(discharges)` records and `r length(names(discharges))` columns.
 The column names have spaces in them which makes working with them a bit cumbersome as quotes have to be used around column names everytime. We can rename the columns by replacing spaces with "_".
 
 ```{r}
-names(discharges)
+
 ```
+
 
 ```{r}
 col_names <- str_replace_all(names(discharges), pattern = " ", replacement = "_")
@@ -53,6 +93,13 @@ names(discharges) <- col_names
 discharges <- select(discharges, -c(7))
 ```
 
+## Missing Data
+
+Let's look at which variables have missing data.
+
+```{r}
+sum(is.na(discharges))
+```
 
 
 
@@ -65,7 +112,6 @@ discharges <- select(discharges, -c(7))
 
 
 ```{r}
-unique(discharges$`Hospital County`)
 ```
 
 
