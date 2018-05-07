@@ -97,7 +97,7 @@ Let's look at which variables have missing data. Visualizations can be a good wa
 to quickly show 
 
 ```{r}
-sum(is.na(discharges))
+sort(sapply(discharges, function(x) sum(is.na(x))), decreasing = TRUE)
 ```
 ```{r}
 missing_by_column <- discharges %>% 
@@ -109,14 +109,27 @@ missing_by_column <- discharges %>%
 head(missing_by_column)
 ```
 
-```{r}
+```{r, eval = FALSE}
+# Dataset is too large thus getting error " Cannot allocate vector of size nMB."
 ggplot(missing_by_column, aes(x = variable, y = row_number, fill = is_missing)) +
-    geom_tile() +
+    geom_raster() +
     scale_fill_grey(name = "",
                     labels = c("Present", "Mssing")) +
     theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
     labs(x = "Variable",
          y = "Rows / Observations")
+```
+```{r}
+library(Amelia)
+missmap(discharges)
+```
+
+```{r}
+filter(discharges, is.na(Facility_Name))
+```
+
+```{r}
+count(filter(discharges, Abortion_Edit_Indicator == "Y"))
 ```
 
 
