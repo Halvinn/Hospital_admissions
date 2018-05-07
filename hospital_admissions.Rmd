@@ -73,16 +73,14 @@ discharges <- read_csv("hosp_discharges.csv", col_types = cols(
 Let's explore the data.
 
 ```{r}
-names(discharges)
+dim(discharges)
+head(names(discharges))
 ```
 
-
+'''
 The dataset has `r count(discharges)` records and `r length(names(discharges))` columns.
 The column names have spaces in them which makes working with them a bit cumbersome as quotes have to be used around column names everytime. We can rename the columns by replacing spaces with "_".
-
-```{r}
-
-```
+'''
 
 
 ```{r}
@@ -95,23 +93,30 @@ discharges <- select(discharges, -c(7))
 
 ## Missing Data
 
-Let's look at which variables have missing data.
+Let's look at which variables have missing data. Visualizations can be a good way
+to quickly show 
 
 ```{r}
 sum(is.na(discharges))
 ```
+```{r}
+missing_by_column <- discharges %>% 
+    is.na %>%
+    as_data_frame %>%
+    mutate(row_number = 1:nrow(.)) %>%
+    gather(variable, is_missing, -row_number)
 
-
-
-
-
-
-
-
-
-
+head(missing_by_column)
+```
 
 ```{r}
+ggplot(missing_by_column, aes(x = variable, y = row_number, fill = is_missing)) +
+    geom_tile() +
+    scale_fill_grey(name = "",
+                    labels = c("Present", "Mssing")) +
+    theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
+    labs(x = "Variable",
+         y = "Rows / Observations")
 ```
 
 
