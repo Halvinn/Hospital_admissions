@@ -83,14 +83,6 @@ The column names have spaces in them which makes working with them a bit cumbers
 '''
 
 
-```{r}
-col_names <- str_replace_all(names(discharges), pattern = " ", replacement = "_")
-names(discharges) <- col_names
-
-# Drop Zip code column as currently unuseful.
-discharges <- select(discharges, -c(7))
-```
-
 ## Missing Data
 
 Let's look at which variables have missing data. Visualizations can be a good way
@@ -120,8 +112,12 @@ ggplot(missing_by_column, aes(x = variable, y = row_number, fill = is_missing)) 
          y = "Rows / Observations")
 ```
 ```{r}
+if (!require(Amelia)) {
+    install.packages(("Amelia"))
+}
+
 library(Amelia)
-missmap(discharges)
+missmap(discharges, col = c("grey", "black"), y.labels = NULL, y.at = NULL, x.cex = 0.6)
 ```
 
 ```{r}
@@ -131,5 +127,35 @@ filter(discharges, is.na(Facility_Name))
 ```{r}
 count(filter(discharges, Abortion_Edit_Indicator == "Y"))
 ```
+
+### Issues with Missing Data.
+1. Column names have spaces. Should be replaced with "_". Easier to work with.
+2. I record has all entries missing. No explanation found. This record should be deleted.
+3. A few columns have a lot records missing. For example, 'Other_Provider_License_Number' 
+column has more than 94% of record missing. This column can be dropped as there is no way to impute the missing data.
+4. From further inspection, any record where Abortion_Edit_Indicator == "Y" has all 
+information about the facility i.e Facility Name, Health Service Area, Hospital County
+etc. removed for privacy purposes. No need to fix this issue.
+5. Zip codes have first two digits removed for privacy purposes. Thus this column
+is not useful as is.
+6. 
+
+### Fixes.
+1. Replace spaces in column names with "_".
+```{r}
+col_names <- str_replace_all(names(discharges), pattern = " ", replacement = "_")
+names(discharges) <- col_names
+```
+
+2. Drop row with missing info. Identified by missing Facility_Id.
+3. Drop columns 'Other_Provider_License_Number' and 'Zip_Code'.
+
+```{r}
+discharges_clean <- discharges %>%
+    select(-c("Other_Provider_License_Number", "Zip_Code_-_3_digits")) %>%
+    filter(!is.na(Facility_Id))
+```
+
+
 
 
