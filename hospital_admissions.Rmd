@@ -14,8 +14,8 @@ The Statewide Planning and Research Cooperative System (SPARCS) Inpatient De-ide
 
 # Libraries and Data
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(include = FALSE, cache = TRUE)
+```{r setup, echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE, cache = TRUE)
 ```
 
 ```{r message=FALSE}
@@ -79,10 +79,8 @@ dim(discharges)
 head(names(discharges))
 ```
 
-'''
 The dataset has `r nrow(discharges)` records and `r length(names(discharges))` columns.
 The column names have spaces in them which makes working with them a bit cumbersome as quotes have to be used around column names everytime. We can rename the columns by replacing spaces with "_".
-'''
 
 
 ## Missing Data
@@ -130,11 +128,11 @@ missmap(discharges, y.labels = NULL, y.at = NULL, x.cex = 0.8)
 ```
 
 ```{r}
-filter(discharges, is.na("Facility Name"))
+filter(discharges, is.na(Facility_Name))
 ```
 
 ```{r}
-count(filter(discharges, "Abortion Edit Indicator" == "Y"))
+count(filter(discharges, Abortion_Edit_Indicator == "Y"))
 ```
 
 ### Issues with Missing Data.
@@ -159,12 +157,11 @@ names(discharges) <- col_names
 2. Drop row with missing info. Identified by missing Facility_Id.
 3. Drop columns 'Other_Provider_License_Number' and 'Zip_Code'.
 
+
 ```{r}
+drop_cols = c("Other_Provider_License_Number", "Zip_Code_-_3_digits")
 discharges_clean <- discharges %>%
-    select(-c("Other_Provider_License_Number", "Zip_Code_-_3_digits")) %>%
+    select(-one_of(drop_cols)) %>%
     filter(!is.na(Facility_Id))
 ```
-
-
-
 
