@@ -2,7 +2,9 @@
 title: "Hospital Admissions"
 author: "Onesmas Ngugi"
 date: "April 4, 2018"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 # INTRODUCTION
 
@@ -13,7 +15,7 @@ The Statewide Planning and Research Cooperative System (SPARCS) Inpatient De-ide
 # Libraries and Data
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo=FALSE, cache=TRUE)
+knitr::opts_chunk$set(include = FALSE, cache = TRUE)
 ```
 
 ```{r message=FALSE}
@@ -78,7 +80,7 @@ head(names(discharges))
 ```
 
 '''
-The dataset has `r count(discharges)` records and `r length(names(discharges))` columns.
+The dataset has `r nrow(discharges)` records and `r length(names(discharges))` columns.
 The column names have spaces in them which makes working with them a bit cumbersome as quotes have to be used around column names everytime. We can rename the columns by replacing spaces with "_".
 '''
 
@@ -86,13 +88,20 @@ The column names have spaces in them which makes working with them a bit cumbers
 ## Missing Data
 
 Let's look at which variables have missing data. Visualizations can be a good way
-to quickly show 
+to quickly communicate results to an audience. Below, I have calculated the 
+percentage of missing data for each variable. Most variables have very few 
+missing data.
+
+I used the `missmap` function from the (Amelia)[https://cran.r-project.org/web/packages/Amelia/vignettes/amelia.pdf] 
+package to plot the missingness of the dataframe.
 
 ```{r}
-sort(sapply(discharges, function(x) sum(is.na(x))), decreasing = TRUE)
+options(scipen=999)
+sort(sapply(discharges, function(x) sum(is.na(x)) / length(x) * 100), decreasing = TRUE)
 ```
-```{r}
+```{r, echo=FALSE, include=FALSE, eval=FALSE}
 missing_by_column <- discharges %>% 
+    sample_n(10000) %>%
     is.na %>%
     as_data_frame %>%
     mutate(row_number = 1:nrow(.)) %>%
@@ -101,31 +110,31 @@ missing_by_column <- discharges %>%
 head(missing_by_column)
 ```
 
-```{r, eval = FALSE}
+```{r, echo=FALSE, include=FALSE, eval=FALSE}
 # Dataset is too large thus getting error " Cannot allocate vector of size nMB."
 ggplot(missing_by_column, aes(x = variable, y = row_number, fill = is_missing)) +
     geom_raster() +
     scale_fill_grey(name = "",
                     labels = c("Present", "Mssing")) +
-    theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
+    theme(axis.text.x = element_text( angle = 45, vjust = 0.5)) +
     labs(x = "Variable",
          y = "Rows / Observations")
 ```
-```{r}
+```{r, fig.height=5, fig.width=7}
 if (!require(Amelia)) {
     install.packages(("Amelia"))
 }
 
 library(Amelia)
-missmap(discharges, col = c("grey", "black"), y.labels = NULL, y.at = NULL, x.cex = 0.6)
+missmap(discharges, y.labels = NULL, y.at = NULL, x.cex = 0.8)
 ```
 
 ```{r}
-filter(discharges, is.na(Facility_Name))
+filter(discharges, is.na("Facility Name"))
 ```
 
 ```{r}
-count(filter(discharges, Abortion_Edit_Indicator == "Y"))
+count(filter(discharges, "Abortion Edit Indicator" == "Y"))
 ```
 
 ### Issues with Missing Data.
