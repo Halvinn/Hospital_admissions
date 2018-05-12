@@ -3,8 +3,8 @@ title: "Hospital Admissions"
 author: "Onesmas Ngugi"
 date: "April 4, 2018"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 # INTRODUCTION
 
@@ -15,7 +15,7 @@ The Statewide Planning and Research Cooperative System (SPARCS) Inpatient De-ide
 # Libraries and Data
 
 ```{r setup, echo=FALSE}
-knitr::opts_chunk$set(echo = FALSE, cache = TRUE)
+knitr::opts_chunk$set(cache = TRUE)
 ```
 
 ```{r message=FALSE}
@@ -32,7 +32,7 @@ url <- "https://health.data.ny.gov/api/views/gnzp-ekau/rows.csv?accessType=DOWNL
 download.file(url, "hosp_discharges.csv")
 ```
 ```{r}
-discharges <- read_csv("hosp_discharges.csv", col_types = cols(
+discharges <- read_csv("hosp_discharges.csv", na = c("", " ", "NA"), col_types = cols(
   `Health Service Area` = col_character(),
   `Hospital County` = col_character(),
   `Operating Certificate Number` = col_character(),
@@ -128,11 +128,11 @@ missmap(discharges, y.labels = NULL, y.at = NULL, x.cex = 0.8)
 ```
 
 ```{r}
-filter(discharges, is.na(Facility_Name))
+filter(discharges, is.na(`Facility Name`))
 ```
 
 ```{r}
-count(filter(discharges, Abortion_Edit_Indicator == "Y"))
+count(filter(discharges, `Abortion Edit Indicator` == "Y"))
 ```
 
 ### Issues with Missing Data.
@@ -165,3 +165,8 @@ discharges_clean <- discharges %>%
     filter(!is.na(Facility_Id))
 ```
 
+```{r}
+dim(discharges_clean)
+```
+
+#
