@@ -16,6 +16,7 @@ The Statewide Planning and Research Cooperative System (SPARCS) Inpatient De-ide
 
 ```{r setup, echo=FALSE}
 knitr::opts_chunk$set(cache = TRUE)
+options("max.print" = 999999)
 ```
 
 ```{r message=FALSE}
@@ -31,7 +32,7 @@ library(stringr)
 url <- "https://health.data.ny.gov/api/views/gnzp-ekau/rows.csv?accessType=DOWNLOAD"
 download.file(url, "hosp_discharges.csv")
 ```
-```{r}
+```{r, warning=FALSE}
 discharges <- read_csv("hosp_discharges.csv", na = c("", " ", "NA"), col_types = cols(
   `Health Service Area` = col_character(),
   `Hospital County` = col_character(),
@@ -76,79 +77,27 @@ Let's explore the data.
 
 ```{r}
 dim(discharges)
+```
+```{r}
 head(names(discharges))
 ```
 
-The dataset has `r nrow(discharges)` records and `r length(names(discharges))` columns.
+The dataset has `r nrow(discharges)` records and `r length(discharges)` columns.
 The column names have spaces in them which makes working with them a bit cumbersome as quotes have to be used around column names everytime. We can rename the columns by replacing spaces with "_".
 
-
-## Missing Data
-
-Let's look at which variables have missing data. Visualizations can be a good way
-to quickly communicate results to an audience. Below, I have calculated the 
-percentage of missing data for each variable. Most variables have very few 
-missing data.
-
-I used the `missmap` function from the (Amelia)[https://cran.r-project.org/web/packages/Amelia/vignettes/amelia.pdf] 
-package to plot the missingness of the dataframe.
-
-```{r}
-options(scipen=999)
-sort(sapply(discharges, function(x) sum(is.na(x)) / length(x) * 100), decreasing = TRUE)
-```
-```{r, echo=FALSE, include=FALSE, eval=FALSE}
-missing_by_column <- discharges %>% 
-    sample_n(10000) %>%
-    is.na %>%
-    as_data_frame %>%
-    mutate(row_number = 1:nrow(.)) %>%
-    gather(variable, is_missing, -row_number)
-
-head(missing_by_column)
-```
-
-```{r, echo=FALSE, include=FALSE, eval=FALSE}
-# Dataset is too large thus getting error " Cannot allocate vector of size nMB."
-ggplot(missing_by_column, aes(x = variable, y = row_number, fill = is_missing)) +
-    geom_raster() +
-    scale_fill_grey(name = "",
-                    labels = c("Present", "Mssing")) +
-    theme(axis.text.x = element_text( angle = 45, vjust = 0.5)) +
-    labs(x = "Variable",
-         y = "Rows / Observations")
-```
-```{r, fig.height=5, fig.width=7}
-if (!require(Amelia)) {
-    install.packages(("Amelia"))
-}
-
-library(Amelia)
-missmap(discharges, y.labels = NULL, y.at = NULL, x.cex = 0.8)
-```
-
-```{r}
-filter(discharges, is.na(`Facility Name`))
-```
-
-```{r}
-count(filter(discharges, `Abortion Edit Indicator` == "Y"))
-```
-
-### Issues with Missing Data.
+## Issues 
 1. Column names have spaces. Should be replaced with "_". Easier to work with.
 2. I record has all entries missing. No explanation found. This record should be deleted.
-3. A few columns have a lot records missing. For example, `Other_Provider_License_Number` 
+3. From the data source, records relating to abortions have some information such as
+i.e Facility Name, Health Service Area, Hospital County Provider Licese Number etc. 
+removed for privacy purposes. We can filter these data into a separate dataframe.
+4. A few columns have a lot records missing. For example, `Other_Provider_License_Number` 
 column has more than 94% of records missing. This column can be dropped as there is no way to impute the missing data. Other columns with missing data are;
 * `Payment_Typology_3`
 * `Payment_typology_2`
 * `Operating_Provider_License_Number`
 * `Length_of_Stay`
-4. From further inspection, any record where Abortion_Edit_Indicator == "Y" has all 
-information about the facility i.e Facility Name, Health Service Area, Hospital County
-etc. removed for privacy purposes. No need to fix this issue.
-5. Zip codes have first two digits removed for privacy purposes. Thus this column
-is not useful as is.
+5. Zip codes have last two digits removed for privacy purposes. 
 
 
 ### Fixes.
@@ -159,43 +108,74 @@ names(discharges) <- col_names
 ```
 
 2. Drop row with missing info. Identified by missing Facility_Id.
-3. Drop columns 'Other_Provider_License_Number' and 'Zip_Code'.
+3. Remove abortion-related records.
+
+```{r}
+abortion_df <- discharges %>%
+    filter(Abortion_Edit_Indicator == "Y")
+
+discharges_clean <- discharges %>%
+    filter(!is.na(Facility_Id)) %>% # Row with missing info excluded.
+    setdiff(abortion_df)  %>%
+    select(-`Abortion_Edit_Indicator`) # Drop Abortion_Edit_Inidcator column.
+```
+
+```{r}
+filter(discharges_clean, is.na(`Facility_Name`))
+```
+
+```{r}
+glimpse(abortion_df)
+```
+
+We can further clean the abortion_df to drop columns with NA's but I will leave that
+for later when I need to use this dataframe.
 
 
 ```{r}
-drop_cols = c("Other_Provider_License_Number", "Zip_Code_-_3_digits")
-discharges_clean <- discharges %>%
-    select(-one_of(drop_cols)) %>% # Columns dropped.
-    filter(!is.na(Facility_Id)) # Row with missing info excluded.
+head(discharges_clean)
 ```
 
-Explore missing data in `Payment_Typology_1` and `Payment_Typology_2` columns.
+4. 
+Explore missing data in `Payment_Typology_1`, `Payment_Typology_2` and 
+`Payment_Typology_3`columns.
+
+```{r}
+plyr::count(df = discharges_clean, vars = "Payment_Typology_1")
+```
+
 
 ```{r}
 discharges_clean %>% filter(is.na(Payment_Typology_3)) %>%
     select(c(Facility_Id, Facility_Name, Total_Charges, Payment_Typology_1,
              Payment_Typology_2, Payment_Typology_3)) %>%
-    sample_n(10)
+    sample_n(10) %>%
+    head(10)
 ```
 
+## Missing Data
+Let's look at which variables have missing data. Visualizations can be a good way
+to quickly communicate results to an audience. Below, I have calculated the 
+percentage of missing data for each variable. Most variables have very few 
+missing data.
 
-
-```{r}
-dim(discharges_clean)
-```
-
-# Univariate Analysis
-Analysis of indiviadual variables wil give us a better understanding of the data by
-exploring such things as distribution or summaries of variables. Boxplots and density 
-plots are a good way of visually communicating distributiong of data.
-
+I used the `missmap` function from the [Amelia](https://cran.r-project.org/web/packages/Amelia/vignettes/amelia.pdf) 
+package to plot the missingness of the dataframe.
 
 ```{r}
-ggplot(discharges_clean, aes(x = 1, y = Length_of_Stay)) +
-    geom_boxplot()
+options(scipen=999)
+sort(sapply(discharges, function(x) sum(is.na(x)) / length(x) * 100), decreasing = TRUE)
 ```
 
 ```{r}
+if (!require(Amelia)) {
+    install.packages(("Amelia"))
+}
 
+library(Amelia)
+missmap(discharges_clean, y.labels = NULL, y.at = NULL, x.cex = 0.8) 
 ```
+
+
+
 
