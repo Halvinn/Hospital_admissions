@@ -24,13 +24,13 @@ These are just a few ideas to help guide the exploratory analysis.
 
 # Libraries and Data
 
-```{r setup, include=FALSE}
+```{r setup, include = FALSE}
 knitr::opts_chunk$set(cache = TRUE)
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = TRUE)
 options("max.print" = 999999)
 ```
 
-```{r message=FALSE}
+```{r libraries, message=FALSE}
 library(readr)
 library(dplyr)
 library(tidyr)
@@ -44,7 +44,7 @@ library(gridExtra)
 url <- "https://health.data.ny.gov/api/views/gnzp-ekau/rows.csv?accessType=DOWNLOAD"
 download.file(url, "hosp_discharges.csv")
 ```
-```{r, warning=FALSE}
+```{r data_import, warning=FALSE}
 discharges <- read_csv("hosp_discharges.csv", na = c("", " ", "NA"), col_types = cols(
   `Health Service Area` = col_character(),
   `Hospital County` = col_character(),
@@ -87,13 +87,6 @@ discharges <- read_csv("hosp_discharges.csv", na = c("", " ", "NA"), col_types =
 
 Let's explore the data.
 
-```{r}
-dim(discharges)
-```
-```{r}
-head(names(discharges))
-```
-
 The dataset has `r nrow(discharges)` records and `r length(discharges)` columns.
 The column names have spaces in them which makes working with them a bit cumbersome as quotes have to be used around column names everytime. We can rename the columns by replacing spaces with "_".
 
@@ -114,15 +107,14 @@ column has more than 94% of records missing. This column can be dropped as there
 
 ### Fixes.
 1. Replace spaces in column names with "_".
-```{r}
+```{r rename_cols}
 col_names <- str_replace_all(names(discharges), pattern = " ", replacement = "_")
 names(discharges) <- col_names
 ```
-
 2. Drop row with missing info. Identified by missing Facility_Id.
 3. Remove abortion-related records.
 
-```{r}
+```{r abortions}
 abortion_df <- discharges %>%
     filter(Abortion_Edit_Indicator == "Y")
 
@@ -158,12 +150,12 @@ missing data.
 I used the `missmap` function from the [Amelia](https://cran.r-project.org/web/packages/Amelia/vignettes/amelia.pdf) 
 package to plot the missingness of the dataframe.
 
-```{r}
+```{r na_by_col}
 options(scipen=999)
 sort(sapply(discharges_clean, function(x) sum(is.na(x)) / length(x) * 100), decreasing = TRUE)
 ```
 
-```{r}
+```{r missmap}
 if (!require(Amelia)) {
     install.packages(("Amelia"))
 }
@@ -171,7 +163,6 @@ if (!require(Amelia)) {
 library(Amelia)
 missmap(discharges_clean, y.labels = NULL, y.at = NULL, x.cex = 0.8) 
 ```
-
 
 
 # Univariate Analysis
@@ -182,7 +173,7 @@ fot visualiztions.
 
 ### Length of Stay
 
-```{r}
+```{r los_hist}
 p1 <- ggplot(discharges_clean, aes(Length_of_Stay)) +
     geom_histogram(binwidth = 1) 
 
@@ -202,15 +193,5 @@ grid.arrange(p1_scaled, p2, ncol = 2)
 summary(discharges_clean$Length_of_Stay)
 ```
 
-The plots above show that `Length_of_Stay` is left-skewed. Most of the values are 
-less tan 15 but there are also a lot of outliers as shown by the boxplot.
-
-One way we can deal with the skewed distribution is by transforming the x scale,
-for example by using the log of x instead.
-
-```{r}
-ggplot(discharges_clean, aes(log(Length_of_Stay))) +
-    geom_histogram(binwidth = 0.5)
-```
-
-
+The plots above show that `Length_of_Stay` is right-skewed. Most of the values are 
+less than 15 but there are also a lot of outliers as shown by the boxplot.
