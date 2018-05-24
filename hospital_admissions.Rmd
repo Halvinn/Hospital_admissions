@@ -24,8 +24,9 @@ These are just a few ideas to help guide the exploratory analysis.
 
 # Libraries and Data
 
-```{r setup, echo=FALSE}
+```{r setup, include=FALSE}
 knitr::opts_chunk$set(cache = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 options("max.print" = 999999)
 ```
 
