@@ -213,6 +213,7 @@ hist_plot <- function(data, col, ...) {
 }
 ```
 
+### Total Costs
 ```{r hist_tc}
 p1 <- ggplot(discharges_clean, aes(Total_Costs)) +
     geom_histogram(bins = 50) 
@@ -235,4 +236,35 @@ On the right, I have excluded some some outliers using the scale_x_continuous
 function to make the histogram a bit more useful. However, the skeweness is still 
 visible in the plot.
 
+### Distribution of a few Discrete Variables
+
+```{r age_group_bar}
+discharges_clean %>%
+    group_by(Age_Group) %>%
+    tally() %>%
+    ggplot(aes(Age_Group, n)) +
+        geom_bar(stat = 'identity') +
+        theme_classic()
+```
+
+```{r}
+race_bar <- ggplot(discharges_clean, aes(Race)) +
+    geom_bar() +
+    theme(axis.text.x = element_text(angle = 45, vjust = 0.6))
+
+gender_bar <- ggplot(discharges_clean, aes(Gender)) +
+    geom_bar() +
+    theme(axis.text.x = element_text(angle = 45, vjust = 0.6))
+
+admi_type_bar <- ggplot(discharges_clean, aes(Type_of_Admission)) +
+    geom_bar() +
+    theme(axis.text.x = element_text(angle = 45, vjust = 0.6))
+
+
+hsa_bar <- ggplot(discharges_clean, aes(Health_Service_Area)) +
+    geom_bar() +
+    theme(axis.text.x = element_text(angle = 45, vjust = 0.6))
+
+grid.arrange(race_bar, gender_bar, admi_type_bar, hsa_bar, nrow = 2, ncol = 2)
+```
 
