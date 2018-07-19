@@ -201,6 +201,9 @@ summary(discharges_clean$Length_of_Stay)
 The plots above show that `Length_of_Stay` is right-skewed. Most of the values are 
 less than 15 but there are also a lot of outliers as shown by the boxplot.
 
+The summary shows the avergae length of stay is 5.2 days while the standard 
+deviation is `r sd(discharges_clean$Length_of_Stay, na.rm = TRUE)`. 
+
 ```{r hist_func, echo = FALSE}
 "Simple function for displaying histograms of numerical variables."
 "... arg for additional arguments when necessary."
@@ -210,19 +213,26 @@ hist_plot <- function(data, col, ...) {
 }
 ```
 
-```{r}
-ggplot(discharges_clean, aes(Total_Costs)) +
+```{r hist_tc}
+p1 <- ggplot(discharges_clean, aes(Total_Costs)) +
+    geom_histogram(bins = 50) 
+
+p1_scaled <- p1 + 
     geom_histogram() +
-    scale_x_continuous(limits = c(0, 150000))
+    scale_x_continuous(limits = c(0, 150000)) 
+
+grid.arrange(p1, p1_scaled, ncol = 2)
 ```
 
 ```{r}
 summary(discharges_clean$Total_Costs)
-
-discharges_clean %>%
-    filter(Total_Costs < 150000) %>%
-    select(Total_Costs) %>%
-    summary()
-
 ```
+
+The histogram on the left shows that the `Total_Cost` variable has extreme outliers
+that skew the plot heavily to the right. 
+
+On the right, I have excluded some some outliers using the scale_x_continuous 
+function to make the histogram a bit more useful. However, the skeweness is still 
+visible in the plot.
+
 
