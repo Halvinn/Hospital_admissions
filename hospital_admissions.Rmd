@@ -37,6 +37,7 @@ library(tidyr)
 library(ggplot2)
 library(stringr)
 library(gridExtra)
+sessionInfo()
 ```
 ```{r, eval = FALSE}
 # Url for data dowload. I saved the cvs file locally to avoid dowloading each time
@@ -148,7 +149,7 @@ percentage of missing data for each variable. Most variables have very few
 missing data.
 
 I used the `missmap` function from the [Amelia](https://cran.r-project.org/web/packages/Amelia/vignettes/amelia.pdf) 
-package to plot the missingness of the dataframe.
+package to visualize missing data.
 
 ```{r na_by_col}
 options(scipen=999)
@@ -164,6 +165,10 @@ library(Amelia)
 missmap(discharges_clean, y.labels = NULL, y.at = NULL, x.cex = 0.8) 
 ```
 
+As seen above, most of the columns do not have any missing data. However, there 
+are four columns that are missing a lot of data. Depending on whether the column
+is useful for analysis, I can drop it or figure out how to deal with the missing
+data, for example, by filling with mean or something similar.
 
 # Univariate Analysis
 
@@ -195,3 +200,29 @@ summary(discharges_clean$Length_of_Stay)
 
 The plots above show that `Length_of_Stay` is right-skewed. Most of the values are 
 less than 15 but there are also a lot of outliers as shown by the boxplot.
+
+```{r hist_func, echo = FALSE}
+"Simple function for displaying histograms of numerical variables."
+"... arg for additional arguments when necessary."
+hist_plot <- function(data, col, ...) { 
+    ggplot(data = data, aes("col")) +
+        geom_histogram()
+}
+```
+
+```{r}
+ggplot(discharges_clean, aes(Total_Costs)) +
+    geom_histogram() +
+    scale_x_continuous(limits = c(0, 150000))
+```
+
+```{r}
+summary(discharges_clean$Total_Costs)
+
+discharges_clean %>%
+    filter(Total_Costs < 150000) %>%
+    select(Total_Costs) %>%
+    summary()
+
+```
+
