@@ -242,16 +242,26 @@ visible in the plot.
 discharges_clean %>%
     group_by(Age_Group) %>%
     tally() %>%
-    ggplot(aes(Age_Group, n)) +
-        geom_bar(stat = 'identity') +
+    ggplot(aes(Age_Group, y = (n)/sum(n))) +
+        geom_bar(stat = 'identity', fill = 'red') +
+        scale_y_continuous(label = scales::percent) +
+        geom_text(aes(label = scales::percent(n/sum(n)),
+                      y = n/sum(n)), vjust = -0.5) +
+        labs(title = 'Age Group Distribution',
+              y = 'Percent') +
         theme_classic()
 ```
 
 ```{r mixed_bars}
-ggplot(discharges_clean, aes(Race)) +
-    geom_bar() +
-    theme(axis.text.x = element_text(angle = 90))
-
+ggplot(discharges_clean, aes(Race, y = (..count..) / sum(..count..))) +
+    geom_bar(fill = 'red') +
+    scale_y_continuous(labels = scales::percent) +
+    labs(title = 'Race Distibution',
+         y = "Percent") +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    theme_classic() 
+```
+```{r }
 ggplot(discharges_clean, aes(Gender)) +
     geom_bar() +
     theme(axis.text.x = element_text(angle = 90))
