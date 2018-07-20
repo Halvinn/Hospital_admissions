@@ -247,24 +247,24 @@ discharges_clean %>%
         theme_classic()
 ```
 
-```{r}
-race_bar <- ggplot(discharges_clean, aes(Race)) +
+```{r mixed_bars}
+ggplot(discharges_clean, aes(Race)) +
     geom_bar() +
-    theme(axis.text.x = element_text(angle = 45, vjust = 0.6))
+    theme(axis.text.x = element_text(angle = 90))
 
-gender_bar <- ggplot(discharges_clean, aes(Gender)) +
+ggplot(discharges_clean, aes(Gender)) +
     geom_bar() +
-    theme(axis.text.x = element_text(angle = 45, vjust = 0.6))
+    theme(axis.text.x = element_text(angle = 90))
 
 admi_type_bar <- ggplot(discharges_clean, aes(Type_of_Admission)) +
     geom_bar() +
-    theme(axis.text.x = element_text(angle = 45, vjust = 0.6))
+    theme(axis.text.x = element_text(angle = 90))
 
 
 hsa_bar <- ggplot(discharges_clean, aes(Health_Service_Area)) +
     geom_bar() +
-    theme(axis.text.x = element_text(angle = 45, vjust = 0.6))
+    theme(axis.text.x = element_text(angle = 90))
 
-grid.arrange(race_bar, gender_bar, admi_type_bar, hsa_bar, nrow = 2, ncol = 2)
+grid.arrange(admi_type_bar, hsa_bar, ncol = 2)
 ```
 
