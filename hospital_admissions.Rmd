@@ -21,7 +21,6 @@ emergency department indicator etc.
 These are just a few ideas to help guide the exploratory analysis. 
 
 
-
 # Libraries and Data
 
 ```{r setup, include = FALSE}
@@ -287,5 +286,29 @@ hsa_bar <- ggplot(discharges_clean, aes(Health_Service_Area)) +
     theme(axis.text.x = element_text(angle = 90)) 
 
 grid.arrange(admi_type_bar, hsa_bar, ncol = 2)
+```
+
+## Univariate Analysis
+
+From the few plots shown above, we can see some continous variables have outliers,
+some very extreme that we have to deal with. For example, the average `Length_of_Stay`
+is about 5 days while the max is 119 days. This is also true for  `Total_Costs` and
+`Total_Charges`as evidenced by the extreme right-skeweness of their histograms. 
+
+We can use different scale transformations to deal with outliers. Log transfomations
+are one way of to deal with right-skewed distributions.
+
+```{r warning=FALSE}
+t1 <- ggplot(discharges_clean, aes(Total_Costs)) +
+    geom_histogram(bins = 50) +
+    labs(title = 'Original') 
+
+t1_trans <- ggplot(discharges_clean, aes(Total_Costs)) +
+    geom_histogram(bins = 50) +
+    scale_x_log10() +
+    labs(title = 'Log Transform') 
+
+grid.arrange(t1, t1_trans, ncol = 2)
+    
 ```
 
