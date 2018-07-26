@@ -201,7 +201,19 @@ Boxplots for large data](http://vita.had.co.nz/papers/letter-value-plot.html):
 >labeled as those observations beyond the most extreme letter value. 
 
 ```{r}
+box1 <- ggplot(discharges_clean, aes(x = 1, y = Length_of_Stay)) +
+            geom_boxplot(na.rm = TRUE) +
+            labs(x = NULL, y = NULL) +
+            coord_flip()
 
+box2 <- ggplot(discharges_clean, aes(x = 1, y = Length_of_Stay))+
+            geom_lv(alpha = 0.8,outlier.colour = 'red') +
+            geom_hline(yintercept = median(discharges_clean$Length_of_Stay, na.rm = TRUE), 
+                       na.rm = TRUE, size = 1, color = 'red') +
+            labs(x =  NULL) +
+            coord_flip()
+
+grid.arrange(box1, box2, nrow = 2)
 ```
 
 
