@@ -3,8 +3,8 @@ title: "Hospital Admissions"
 author: "Onesmas Ngugi"
 date: "April 4, 2018"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 # INTRODUCTION
 
@@ -161,7 +161,7 @@ if (!require(Amelia)) {
 }
 
 library(Amelia)
-missmap(discharges_clean, y.labels = NULL, y.at = NULL, x.cex = 0.8) 
+missmap(discharges_clean, col = c('orange', 'blue'), y.labels = NULL, y.at = NULL, x.cex = 0.8) 
 ```
 
 As seen above, most of the columns do not have any missing data. However, there 
@@ -177,19 +177,31 @@ fot visualiztions.
 
 ### Length of Stay
 
+
 ```{r los_hist}
 p1 <- ggplot(discharges_clean, aes(Length_of_Stay)) +
-    geom_histogram(binwidth = 1) 
+    geom_histogram(na.rm = TRUE) 
 
-p1_scaled <- p1 + scale_x_continuous(breaks = c(0, 10, 20, 30, 50, 75, 100, 125)) +
-    theme_classic()
+p1_scaled <- p1 + scale_x_continuous(limits = c(0,60))
 
-p2 <- ggplot(discharges_clean, aes(x = 1, y = Length_of_Stay)) +
-    geom_boxplot() +
-    xlab("") +
-    theme_classic()
+grid.arrange(p1, p1_scaled, ncol = 2)
+```
 
-grid.arrange(p1_scaled, p2, ncol = 2)
+Boxplots are a good way to visualize summaries of a variable including mean, 1st
+and 3rd quartiles and any outliers in the data. One limit with traditional 
+boxplots, however, poor visualization if the data set is too large with too many
+outliers.
+
+A better way to draw boxplots for large data sets is using the letter value plots
+that better estimate tail behavior. From Hadley Wickham's [Letter-value plots: 
+Boxplots for large data](http://vita.had.co.nz/papers/letter-value-plot.html):
+>The letter-value plot ...: (1) it conveys more detailed information in the 
+>tails using letter values, but only to the depths where the letter values are 
+>reliable estimates of their corresponding quantiles and (2) {"}outliers{"} are 
+>labeled as those observations beyond the most extreme letter value. 
+
+```{r}
+
 ```
 
 
