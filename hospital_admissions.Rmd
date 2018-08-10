@@ -3,16 +3,16 @@ title: "Hospital Admissions"
 author: "Onesmas Ngugi"
 date: "April 4, 2018"
 output:
-  pdf_document: default
   html_document: default
+  word_document: default
+  pdf_document: default
 ---
 # INTRODUCTION
 
 The Statewide Planning and Research Cooperative System (SPARCS) Inpatient De-identified File contains discharge level detail on patient characteristics, diagnoses, treatments, services, and charges. This data file contains basic record level detail for the discharge. The de-identified data file does not contain data that is protected health information (PHI) under HIPAA. The health information is not individually identifiable; all data elements considered identifiable have been redacted. For example, the direct identifiers regarding a date have the day and month portion of the date removed.
 
 A few questions that might be interesting to help explore the data.
-1. What affects hospital length of stay? Type of admission, patient disposition, 
-emergency department indicator etc.
+1. What affects hospital length of stay? Type of admission, patient disposition,emergency department indicator etc.
 2. Are costs for similar procedures different depending in hospital area.
 3. How ethnicity or race affect birth weight.
 4. Costs over time.
@@ -25,7 +25,7 @@ These are just a few ideas to help guide the exploratory analysis.
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(cache = TRUE)
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 options("max.print" = 999999)
 ```
 
@@ -201,6 +201,8 @@ Boxplots for large data](http://vita.had.co.nz/papers/letter-value-plot.html):
 >labeled as those observations beyond the most extreme letter value. 
 
 ```{r}
+library(lvplot)
+
 box1 <- ggplot(discharges_clean, aes(x = 1, y = Length_of_Stay)) +
             geom_boxplot(na.rm = TRUE) +
             labs(x = NULL, y = NULL) +
