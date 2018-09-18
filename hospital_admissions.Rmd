@@ -340,5 +340,36 @@ grid.arrange(t1, t1_trans, ncol = 2)
 
 The transformed histogram of `Total_Costs` is normally distibuted.
 
+# Bivariate Analysis
+In bivariate analysis, we explore how two variables change with respect to one 
+another. That is, influence of one variable on another. For example, we can 
+investigate which variables affect hospital length of stay the most. Intuitively, 
+things like severity of disease, risk of mortality and age might have big effects
+on length of stay while health service areaor race might not affect it much.
+
+One way to quickly see relationships between variables is using correlation matrix,
+which plots correlation coefficients between variables.
+
+One thing to note is that correlation coefficients can only be calculated for
+numeric variables, thus we will have to filter our data for numeric columns only.
+
+### Correlation matrix
+
+There are many libraries that can be used to draw a correlation matrix. I use 
+the `corrplot` pakage below. 
+
+```{r correlation matrix}
+library(corrplot)
+
+num_cols <- c("Length_of_Stay", "CCS_Diagnosis_Code", "APR_DRG_Code",
+              "APR_Severity_of_Illness_Code", "Birth_Weight", "Total_Charges",
+             "Total_Costs")
+
+filtered_df <- discharges_clean[num_cols]
+
+c <- cor(filtered_df, use = 'complete.obs')
+corrplot(c, method = 'circle', type = 'upper')
+```
+
 
 
